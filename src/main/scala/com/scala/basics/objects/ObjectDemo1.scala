@@ -9,11 +9,17 @@ object ObjectDemo1 {
   }
 }
 
-class User(inName:String,inAge:Int=10){
+class User private(var inName:String,var inAge:Int=10){
   var name:String = inName
   var age:Int = inAge
+ 
   override def toString:String={
     "name="+name+",age="+age
-  } 
+  }
+  println("主构造器")
+  def this(inName:String){
+    this("",30)
+    print("辅助构造器")
+  }
 }
 
