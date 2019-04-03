@@ -1,5 +1,9 @@
 
-
+package object com{
+   def com_fun(){
+     print("com_fun")
+   }
+}
 
 package com{
   package object scala{
@@ -7,9 +11,10 @@ package com{
   }
   
   package scala{
-    object Test{
+    object PackageDemo3{
       def main(args:Array[String]){
         print(name)
+        com_fun()
       }
     }
   }
