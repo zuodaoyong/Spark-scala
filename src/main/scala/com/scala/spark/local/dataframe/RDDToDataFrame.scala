@@ -4,6 +4,10 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 case class stu(id:Int,name:String,age:Int)
+
+/**
+  * 反射形式把RDD转DataFrame
+  */
 object RDDToDataFrame {
 
   def main(args: Array[String]): Unit = {
@@ -17,7 +21,7 @@ object RDDToDataFrame {
       .map(arr=>stu(arr(0).toInt,arr(1),arr(2).toInt))
       .toDF()
 
-    df.createTempView("stu")
+    df.registerTempTable("stu")
     val resultDF=sqlContext.sql("select * from stu where age>20")
     resultDF.show()
     val resultRDD=resultDF.rdd
