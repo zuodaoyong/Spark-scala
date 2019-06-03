@@ -3,7 +3,7 @@ package com.scala.spark.local.v1.transformation
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
-  * 统计每个班级的总分
+  * 统计每个班级的总分(不需要Shuffer)
   */
 object ReduceByKeyDemo {
 
