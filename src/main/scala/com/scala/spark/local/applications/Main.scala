@@ -9,6 +9,6 @@ object Main {
       val sparkConf=new SparkConf().setMaster("local[*]").setAppName(Main.getClass.getSimpleName)
       val session=SparkSession.builder().config(sparkConf).getOrCreate()
       val loadDate=new LoadData
-      loadDate.loadTbDate(session).show()
+      loadDate.loadTbDate(session)
   }
 }
