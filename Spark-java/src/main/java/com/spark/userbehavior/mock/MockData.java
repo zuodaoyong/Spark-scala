@@ -66,7 +66,7 @@ public class MockData {
             }
         }
 
-        JavaRDD<Row> rowJavaRDD = sc.parallelize(rows);
+        JavaRDD<Row> rowJavaRDD = (JavaRDD<Row>)sc.parallelize(rows);
         //创建schema
         StructType schema= DataTypes.createStructType(Arrays.asList(
                 DataTypes.createStructField("date", DataTypes.StringType, true),
@@ -100,7 +100,7 @@ public class MockData {
                     professional, city, sex);
             rows.add(row);
         }
-        JavaRDD<Row> rowJavaRDD1 = sc.parallelize(rows);
+        JavaRDD<Row> rowJavaRDD1 = (JavaRDD<Row>)sc.parallelize(rows);
         StructType structType = DataTypes.createStructType(Arrays.asList(
                 DataTypes.createStructField("user_id", DataTypes.LongType, true),
                 DataTypes.createStructField("username", DataTypes.StringType, true),
