@@ -22,7 +22,7 @@ object MockData {
     val actions=List("search", "click", "order", "pay")
     val random=new Random
     for(i<- 0 until 100){
-      val userid=random.nextInt(100)
+      val userid=random.nextInt(100).toLong
       for(j<-0 until 10){
         val sessionid=UUID.randomUUID.toString.replace("-", "")
         val baseActionTime = date + " " + random.nextInt(23)
@@ -62,7 +62,7 @@ object MockData {
     val rdd1=sparkContext.parallelize(rows)
     val schema1=DataTypes.createStructType(Array(
       DataTypes.createStructField("date", DataTypes.StringType, true),
-      DataTypes.createStructField("user_id", DataTypes.IntegerType, true),
+      DataTypes.createStructField("user_id", DataTypes.LongType, true),
       DataTypes.createStructField("session_id", DataTypes.StringType, true),
       DataTypes.createStructField("page_id", DataTypes.IntegerType, true),
       DataTypes.createStructField("action_time", DataTypes.StringType, true),
@@ -82,7 +82,7 @@ object MockData {
 
     val sexes=List("male", "female")
     for(i <-0 until 100){
-      val userid = i
+      val userid = i.toLong
       val username = "user" + i
       val name = "name" + i
       val age = random.nextInt(60)
@@ -95,7 +95,7 @@ object MockData {
     }
     val rdd2=sparkContext.parallelize(rows)
     val schema2=DataTypes.createStructType(Array(
-      DataTypes.createStructField("user_id", DataTypes.IntegerType, true),
+      DataTypes.createStructField("user_id", DataTypes.LongType, true),
       DataTypes.createStructField("username", DataTypes.StringType, true),
       DataTypes.createStructField("name", DataTypes.StringType, true),
       DataTypes.createStructField("age", DataTypes.IntegerType, true),
