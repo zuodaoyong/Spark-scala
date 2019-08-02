@@ -93,7 +93,7 @@
           <!-- If you have classpath issue like NoDefClassError,... -->
           <!-- useManifestOnlyJar>false</useManifestOnlyJar -->
           <includes>
-            <include>**/*Test.*</include>
+            <!--<include>**/*Test.*</include>-->
             <include>**/*Suite.*</include>
           </includes>
         </configuration>
