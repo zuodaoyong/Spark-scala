@@ -1,6 +1,8 @@
 package com.spark.userbehavior.application;
 
+import com.spark.userbehavior.mock.DateUtils;
 import org.apache.avro.generic.GenericData;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -35,19 +37,24 @@ public class ImoocLogApplication {
                 while (iterator.hasNext()){
                     String next = iterator.next();
                     String[] splits = next.split("\\s");
-                    String time = splits[0];
-                    String url = splits[1];
-                    Long traffic = Long.valueOf(splits[2]);
-                    String ip = splits[3];
-                    String cms = url.substring(url.indexOf(domainBroadCast.getValue()) + domain.length());
-                    String[] cmsTypeId = cms.split("/");
+                    String ip = splits[0];
+                    String time = DateUtils.parse(splits.length>4?(splits[3]+" "+splits[4]):"");
+                    String url=splits.length>11?splits[11].replaceAll("\"",""):"";
+                    Long traffic=0L;
+                    if(splits.length>9){
+                        traffic=Long.valueOf(splits[9]);
+                    }
                     String cmsType = "";
                     Long cmsId = 0l;
-                    if(cmsTypeId.length > 1) {
-                        cmsType = cmsTypeId[0];
-                        cmsId = Long.valueOf(cmsTypeId[1]);
+                    if(StringUtils.isNotEmpty(url)&&url.length()>domainBroadCast.value().length()){
+                        String cms = url.substring(url.indexOf(domainBroadCast.value()) + domainBroadCast.value().length());
+                        String[] cmsTypeId = cms.split("/");
+                        if(cmsTypeId.length > 1) {
+                            cmsType = cmsTypeId[0];
+                            cmsId = Long.valueOf(cmsTypeId[1]);
+                        }
                     }
-                    String city = ip;
+                    String city="";
                     String day = time.substring(0,10).replaceAll("-","");
                     Row row = RowFactory.create(time, url, traffic,
                             ip, cmsType, cmsId,

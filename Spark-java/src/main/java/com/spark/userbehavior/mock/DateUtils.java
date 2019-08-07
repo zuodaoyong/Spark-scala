@@ -1,9 +1,13 @@
 package com.spark.userbehavior.mock;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * 日期时间工具类
@@ -18,7 +22,37 @@ public class DateUtils {
 			new SimpleDateFormat("yyyy-MM-dd");
 	public static final SimpleDateFormat DATEKEY_FORMAT = 
 			new SimpleDateFormat("yyyyMMdd");
-	
+	//输入文件日期时间格式
+	//10/Nov/2016:00:01:02 +0800
+	private static FastDateFormat YYYYMMDDHHMM_TIME_FORMAT = FastDateFormat.getInstance("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
+	//目标日期格式
+	private static FastDateFormat TARGET_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
+
+	/**
+	 * 获取时间：yyyy-MM-dd HH:mm:ss
+	 */
+	public static String parse(String time){
+		if(StringUtils.isNotEmpty(time)){
+			return TARGET_FORMAT.format(new Date(getTime(time)));
+		}
+		return null;
+	}
+
+	/**
+	 * 获取输入日志时间：long类型
+	 *
+	 * time: [10/Nov/2016:00:01:02 +0800]
+	 */
+	public static Long getTime(String time){
+		try {
+			return YYYYMMDDHHMM_TIME_FORMAT.parse(time.substring(time.indexOf("[") + 1,
+					time.lastIndexOf("]"))).getTime();
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	/**
 	 * 判断一个时间是否在另一个时间之前
 	 * @param time1 第一个时间
@@ -156,7 +190,7 @@ public class DateUtils {
 	
 	/**
 	 * 格式化日期key
-	 * @param date
+	 * @param datekey
 	 * @return
 	 */
 	public static Date parseDateKey(String datekey) {
