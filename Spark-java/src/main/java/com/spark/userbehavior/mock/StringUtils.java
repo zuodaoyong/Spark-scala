@@ -1,5 +1,7 @@
 package com.spark.userbehavior.mock;
 
+import java.util.regex.Pattern;
+
 /**
  * 字符串工具类
  * @author Administrator
@@ -7,6 +9,10 @@ package com.spark.userbehavior.mock;
  */
 public class StringUtils {
 
+	public static boolean isNumeric(String str){
+		Pattern pattern = Pattern.compile("[0-9]*");
+		return pattern.matcher(str).matches();
+	}
 	/**
 	 * 判断字符串是否为空
 	 * @param str 字符串
