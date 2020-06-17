@@ -4,6 +4,7 @@ import org.apache.log4j.Level
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 case class User(userId: Int, //用户id
@@ -23,16 +24,72 @@ object MovieUserAnalyzerApplication {
 
   def main(array: Array[String]): Unit = {
 
-    val sparkConf = new SparkConf().setMaster("local[*]")
+    val sparkConf = new SparkConf().setMaster("local[1]")
       .setAppName(MovieUserAnalyzerApplication.getClass.getSimpleName())
+    sparkConf.set("spark.default.parallelism","1")
     val sc = new SparkContext(sparkConf)
+
     sc.setLogLevel("ERROR")
     val userRDD=getUserRDD(sc)
     val movieRDD=getMovieRDD(sc)
     val ratingRDD=getRatingRDD(sc)
-    getUserByMovie(userRDD,ratingRDD,movieRDD)
+    //getUserByMovie(userRDD,ratingRDD,movieRDD)
+    //getTop10Movie(ratingRDD)
+    //getViewMovie(ratingRDD)
+    //maleLoveMovie(userRDD,ratingRDD)
+    //getFemaleLoveMovie(userRDD,ratingRDD)
+    getUserGroup(sc,userRDD,ratingRDD,movieRDD)
+  }
+
+  //用户分群
+  def getUserGroup(sc:SparkContext,userRDD:RDD[User],ratingRDD:RDD[Rating],movieRDD:RDD[Movie]): Unit ={
+    val qq=userRDD.filter(x=>x.age==18).map(x=>(x.userId,x.age))
+    val wechat=userRDD.filter(x=>x.age==25).map(x=>(x.userId,x.age))
+    val qqSet=mutable.HashSet() ++ qq.map(_._1).collect()
+    val wechatSet=mutable.HashSet()++ wechat.map(_._1).collect()
+    val qqBroadCast=sc.broadcast(qqSet)
+    val wechatBroadCast=sc.broadcast(wechatSet)
+
+    val qq_Rating=ratingRDD.filter(x=>qqBroadCast.value.contains(x.userId)).map(x=>(x.movieId,1))
+    val movie=movieRDD.map(x=>(x.id,x.title))
+    val qq_movie:RDD[(Int,(String,Int))]=movie.join(qq_Rating)
+    qq_movie.map(x=>x._2).reduceByKey(_+_).map(x=>(x._2,x._1)).sortByKey(false).foreach(println(_))
+  }
+
+  //最受女性喜欢的电影
+  def getFemaleLoveMovie(userRDD:RDD[User],ratingRDD:RDD[Rating]): Unit ={
+    val user=userRDD.filter(x=>x.gender=="F").map(x=>(x.userId,1))
+    val rating=ratingRDD.map(x=>(x.userId,x.movieId))
+    user.join(rating).map(x=>(x._2._2,x._2._1)).reduceByKey(_+_).map(x=>(x._2,x._1))
+      .sortByKey(false).foreach(println(_))
+  }
+
+  //最受男性喜欢的电影
+  def maleLoveMovie(userRDD:RDD[User],ratingRDD:RDD[Rating]): Unit ={
+    val user=userRDD.filter(x=>x.gender=="M")
+      .map(x=>(x.userId,1))
+    val rating=ratingRDD.map(x=>(x.userId,x.movieId))
+    val resRDD=user.join(rating)
+    resRDD.map(x=>(x._2._2,x._2._1)).reduceByKey(_+_).map(x=>(x._2,x._1))
+      .sortByKey(false).foreach(println(_))
+  }
+
+  //观看人数最多的人数
+  def getViewMovie(ratingRDD:RDD[Rating]): Unit ={
+    val rdd=ratingRDD.map(x=>(x.movieId,1))
+    rdd.reduceByKey(_+_).map(x=>(x._2,x._1))
+      .sortByKey(false).foreach(println(_))
 
   }
+
+  //所有电影平均分最高的top10
+  def getTop10Movie(ratingRDD: RDD[Rating]): Unit ={
+    val movieRatingTuple:RDD[(Int,(Double,Int))]=ratingRDD.map(rating=>(rating.movieId,(rating.rating,1)))
+    movieRatingTuple.reduceByKey((x,y)=>(x._1+y._1,x._2+y._2))
+      .map(x=>(x._2._1/x._2._2,x._1)).sortByKey(false)
+      .take(100).foreach(println(_))
+  }
+
   //某部电影观看的用户信息
   def getUserByMovie(userRDD:RDD[User],ratingRDD:RDD[Rating],movieRDD:RDD[Movie]){
     val userIdUser=userRDD.map(user=>(user.userId,user))
