@@ -20,6 +20,21 @@ case class Movie(id: Int, //电影id
 case class Rating(
                  userId:Int,movieId:Int,rating:Double,timeStamp:Long
                  )
+case class SecondarySortKey(val first:Double,val second:Double) extends Ordered[SecondarySortKey] with Serializable{
+  override def compare(that: SecondarySortKey): Int = {
+    if(this.first!=that.first){
+      (this.first-that.first).toInt
+    }else{
+      if(this.second-that.second>0){
+          Math.ceil(this.second-that.second).toInt
+      }else if(this.second-that.second<0){
+          Math.floor(this.second-that.second).toInt
+      }else{
+        (this.second-that.second).toInt
+      }
+    }
+  }
+}
 object MovieUserAnalyzerApplication {
 
   def main(array: Array[String]): Unit = {
@@ -33,12 +48,24 @@ object MovieUserAnalyzerApplication {
     val userRDD=getUserRDD(sc)
     val movieRDD=getMovieRDD(sc)
     val ratingRDD=getRatingRDD(sc)
+
     //getUserByMovie(userRDD,ratingRDD,movieRDD)
     //getTop10Movie(ratingRDD)
     //getViewMovie(ratingRDD)
     //maleLoveMovie(userRDD,ratingRDD)
     //getFemaleLoveMovie(userRDD,ratingRDD)
-    getUserGroup(sc,userRDD,ratingRDD,movieRDD)
+    //getUserGroup(sc,userRDD,ratingRDD,movieRDD)
+    movieRatingSecondKeySort(ratingRDD)
+  }
+
+
+  //对电影评分进行二次排序
+  def movieRatingSecondKeySort(ratingRDD:RDD[Rating]): Unit ={
+
+    val sortKey=ratingRDD.map(rating=>(new SecondarySortKey(rating.timeStamp.toDouble,rating.rating),rating))
+    sortKey.sortByKey(false).foreach(println(_))
+
+
   }
 
   //用户分群
