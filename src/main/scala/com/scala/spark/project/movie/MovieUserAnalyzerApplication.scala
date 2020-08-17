@@ -2,6 +2,7 @@ package com.scala.spark.project.movie
 
 import org.apache.log4j.Level
 import org.apache.spark.rdd.RDD
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.mutable
